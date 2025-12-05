@@ -191,19 +191,20 @@ button:hover { background: #0b7dda; }
                 const data = await response.json();
 
                 if (data.success) {
-                    showResult('uploadResult', '✓ ' + data.message, 'success');
+    showResult('uploadResult', '✓ ' + data.message, 'success');
 
-                    // Clear form
-                    document.getElementById('uploadName').value = '';
-                    document.getElementById('fileInput').value = '';
-                    selectedFile = null;
+    // Clear form
+    document.getElementById('uploadName').value = '';
+    document.getElementById('fileInput').value = '';
+    selectedFile = null;
 
-                    // Update server status
-                    checkServerStatus();
+    // Update server status
+    checkServerStatus();
 
-                    // Update if same name
-                    if (name.toLowerCase() === document.getElementById('searchName').value.trim().toLowerCase()) {
-                        setTimeout(searchImage, 500);
+    // Display the uploaded image immediately if same name as current search
+    if (name.toLowerCase() === document.getElementById('searchName').value.trim().toLowerCase()) {
+        displayImage(`${API_URL}/public/${encodeURIComponent(name)}.jpg`);
+    
                     }
                 } else {
                     showResult('uploadResult', '✗ ' + data.error, 'error');
@@ -267,6 +268,7 @@ button:hover { background: #0b7dda; }
 </body>
 
 </html>
+
 
 
 
