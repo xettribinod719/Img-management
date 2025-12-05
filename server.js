@@ -1,4 +1,4 @@
-// server.js - FIXED VERSION
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +12,6 @@ if (!fs.existsSync(PUBLIC_DIR)) {
     console.log('✅ Created public folder');
 }
 
-// Helper function to parse multipart form data
 function parseMultipartFormData(body, boundary) {
     const parts = body.split(`--${boundary}`);
     const result = { files: [], fields: {} };
@@ -44,12 +43,33 @@ function parseMultipartFormData(body, boundary) {
             const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
 
             if (filenameMatch) {
-                // It's a file
+                // It's a file - FIX HERE: Handle binary data properly
+                const rawData = bodyText;
+                
+                // Convert the binary string to Buffer properly
+                let buffer;
+                if (typeof rawData === 'string') {
+                    // Create buffer from binary string
+                    const length = rawData.length;
+                    buffer = Buffer.alloc(length);
+                    for (let i = 0; i < length; i++) {
+                        buffer[i] = rawData.charCodeAt(i) & 0xFF;
+                    }
+                } else {
+                    buffer = Buffer.from(rawData);
+                }
+                
+                // Remove trailing \r\n if present
+                let finalData = buffer;
+                if (buffer.slice(-2).toString() === '\r\n') {
+                    finalData = buffer.slice(0, -2);
+                }
+                
                 result.files.push({
                     name: nameMatch ? nameMatch[1] : 'file',
                     filename: filenameMatch[1],
                     contentType: headers['content-type'] || 'application/octet-stream',
-                    data: Buffer.from(bodyText.substring(0, bodyText.length - 2)) // Remove trailing \r\n
+                    data: finalData
                 });
             } else if (nameMatch) {
                 // It's a field
@@ -417,3 +437,4 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
 
 });
+
