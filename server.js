@@ -202,25 +202,29 @@ res.end(JSON.stringify({
             const boundary = boundaryMatch[1];
 
             try {
-                // Parse the form data
-                const formData = parseMultipartFormData(body.toString('binary'), boundary);
+    // Parse the form data - FIX: Use 'latin1' encoding for binary
+    const bodyString = body.toString('latin1');  // Changed from 'binary' to 'latin1'
+    const formData = parseMultipartFormData(bodyString, boundary);
 
-                if (formData.files.length === 0) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: false,
-                        error: 'No file found in upload'
-                    }));
-                    return;
-                }
+    if (formData.files.length === 0) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            error: 'No file found in upload'
+        }));
+        return;
+    }
 
-                const file = formData.files[0];
-                const fileName = name.toLowerCase() + '.jpg';
-                const filePath = path.join(PUBLIC_DIR, fileName);
+    const file = formData.files[0];
+    const fileName = name.toLowerCase() + '.jpg';
+    const filePath = path.join(PUBLIC_DIR, fileName);
 
-                // Save the file
-                fs.writeFileSync(filePath, file.data);
-
+    console.log(`📁 File data size: ${file.data.length} bytes`);
+    console.log(`📁 First 10 bytes (hex): ${file.data.slice(0, 10).toString('hex')}`);
+    
+    // Save the file with binary flag
+    fs.writeFileSync(filePath, file.data, 'binary');  // Added 'binary' flag
+               
                 console.log(`✅ Image saved: ${fileName} (${file.data.length} bytes)`);
 
                 res.writeHead(200, {
@@ -437,4 +441,5 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
 
 });
+
 
