@@ -116,11 +116,17 @@ const server = http.createServer((req, res) => {
         console.log(`🔍 Searching for: ${imagePath}`);
 
         if (fs.existsSync(imagePath)) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                image: `/images/${imageName}?t=${Date.now()}`,
-                name: name
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+res.end(JSON.stringify({
+    success: true,
+    image: `/images/${imageName}?t=${Date.now()}`,  
+    name: name,
+    debug: {  
+        size: stats.size,
+        header: header
+    }
+}));
+
             }));
         } else {
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -409,4 +415,5 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
+
 });
